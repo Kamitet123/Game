@@ -10,8 +10,8 @@ unsigned short GetChoice(unsigned short min, unsigned short max, const string& m
     cin >> choice;
 
     while (choice < min || choice > max || cin.fail()) {
-        cin.clear();                
-        cin.ignore(1000, '\n');     
+        cin.clear();
+        cin.ignore(1000, '\n');
         cout << "Неверный выбор, попробуй снова: ";
         cin >> choice;
     }
@@ -81,6 +81,20 @@ public:
 
     bool operator == (const Warrior& warrior) const {
         return ((warrior.damage == this->damage) && (warrior.health == this->health) && (warrior.strenght == this->strenght));
+    }
+    bool Save() override {
+        if (Npc::Save()) {
+            ofstream saveSystem("save.bin", ios::binary | ios::app);
+            if (saveSystem.is_open()) {
+                saveSystem.write(reinterpret_cast<const char*>(&strenght), sizeof(strenght));
+                for (int i = 0; i < 4; i++)
+                {
+                    saveSystem
+
+                }
+            }
+
+        }
     }
 
     ~Warrior() {
@@ -176,6 +190,9 @@ public:
     void Create(Npc* player) {
         player->Create();
     }
+    void Save(Npc* player) {
+        player->S();
+    }
 };
 
 
@@ -199,7 +216,7 @@ int main() {
 
     cout << "Привет, путник\nПрисядь у костра и расскажи о себе\n";
 
-    
+
     unsigned short choise = GetChoice(1, 2, "Ты впервые тут? (1 - новый персонаж, 2 - загрузить)\n> ");
 
     if (choise == 1) {
@@ -221,13 +238,45 @@ int main() {
         }
     }
 
+    cout << "Сделаем остановку тут?\n\t1 - сщхранить игру\n\t2 - продолжить\n";
+    cin >> choise;
+    while (choise > 2 || choise < 1)
+    {
+        cout << "Наверное ты ошибся , повтори снова\n";
+        cin >> choise;
+    }
+    cout << "Сделаем остановку тут?\n\t1 - сохранить игру\n\t2 - продолжить\n";
+    cin >> choise;
+    while (choise > 2 || choise < 1) {
+        cout << "Наверное ты ошибся , повтори снова\n";
+        cin >> choise;
+    }
+
+    
+
     delete warrior;
+    warrior = nullptr;
     delete warrior2;
+    warrior2 = nullptr;
     delete wizard1;
+    wizard1 = nullptr;
     delete wizard2;
+    wizard2 = nullptr;
     delete megaWizard;
+    megaWizard = nullptr;
     delete paladin;
+    paladin = nullptr;
     delete player;
+
+    cout << "Сделаем остановку тут\n\t1-сохранить игру\n2-продолжить\n";
+    unsigned short choice = GetChoice(1, 2);
+    if (choice == 1)
+    {
+        if (warrior != nullptr) player->Save(warrior);
+        if (warrior != nullptr) player->Save(megaWizard);
+        if (warrior != nullptr) player->Save(paladin);
+
+    }
 
     return 0;
 }
