@@ -1,0 +1,45 @@
+#pragma once
+using namespace std;
+
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+class Npc
+{
+protected:
+
+    string name{ "персонаж" };
+    unsigned int health{ 10 };
+    float damage{ 5 };
+    unsigned short lvl{ 1 };
+
+public:
+
+    Npc();
+    virtual void GetInfo();
+    virtual void Create() {};
+    bool Save() {
+        ifstream loadSystem("save.bin", ios::binary);
+        Npc npc; // временное хранилище для считывания из файла
+        if (loadSystem.is_open()) 
+        {
+            loadSystem.read(reinterpret_cast< char*>(&npc.name),sizeof(npc.name));
+            loadSystem.read(reinterpret_cast< char*>(&npc.name), sizeof(npc.health));
+            loadSystem.read(reinterpret_cast< char*>(&npc.name), sizeof(npc.damage));
+            loadSystem.read(reinterpret_cast< char*>(&npc.name), sizeof(npc.lvl));
+            return true;
+        }
+        else 
+        {
+            cout << "Связь с небесами нарушена \nПамять о ваших пушествиях повреждена\n";
+            return false;
+
+        }
+        loadSystem.close();
+        return npc;
+    };
+    //Npc Load();
+
+};
