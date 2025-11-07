@@ -1,62 +1,67 @@
+
 #pragma once
-#ifndef WARRIOR
-#define WARRIOR
-#include "Npc.h"
-
 #include <iostream>
-class Warrior : virtual public Npc //наследование с модификатором public (неизменное)
+#include <fstream>
+
+using namespace std;
+
+class Npc
 {
-protected:  //модификатор доступа (приватный - защищенный, доступ к полям, только внутри класса)
-    unsigned short strenght{ 31 };
-    string weapons[4] = { "кастет", "дубинка", "клинок", "меч" };
+protected: //модификатор 0 защищенный (дает доступ внутри класса родителя и наследника)
+    //но все еще не дает доступ в основном потоке программы
+
+    string name{ "персонаж" };
+    unsigned int health{ 10 };
+    float damage{ 5 };
+    unsigned short lvl{ 1 };
+
+public:    //публичный модификатор доступ (использовать метод можно в любом месте)
+    string GetName();
+    unsigned int GetHealth();
+    float GetDamage();
+    unsigned int GetLvl();
+    virtual void GetInfo();
+
+    virtual void Create() {};
+    virtual bool Save();
+    virtual ~Npc() = default;
+   
+    Npc Load();
+    
+
+
+
+};
+class Player
+{
+private:
+    unique_ptr<Npc> currentCharacter{ nullptr };
 public:
-    //конструктор - метод, который вызывается в момент создания экземпляра
-    //класса (вручную вызвать в основном потоке программы не можем)
+    void Create(unique_ptr<Npc> player)
+    {
+        currentCharacter = move(player);
+        currentCharacter->Create();
 
-    Warrior() //конструктор по умолчанию, когда нет аргументов
-    {
-        cout << "конструктор война по умолчанию" << endl;
-        name = "воин";
-        health = 35;
-        damage = 10;
     }
-    //кастомный конструктор
-    Warrior(string name, unsigned int health, float damage)
-    {
-        cout << "кастомный конструктор война" << endl;
-        this->name = name;
-        this->health = health;
-        this->damage = damage;
+    void Create() {
+        if (currentCharacter != nullptr)
+            currentCharacter->Create();
     }
-
-    void GetWeapons()
-    {
-        cout << name << " взял в руки " << weapons[lvl - 1];
+    bool Save() {
+        return currentCharacter ? currentCharacter->Save() : false;
     }
-    void GetInfo() override //полиморфизм (перегрузка для метода)
+    bool Load(unique_ptr<Npc> player) 
     {
-        Npc::GetInfo();
-        cout << "Сила - " << strenght << endl;
-        cout << "Доступное оружие - ";
-        for (int i = 0; i < lvl; i++)
-        {
-            cout << weapons[i] << endl;
+        if (player->Load()) {
+            currentCharacter = move(player);
+            return true;
         }
+        return false;
     }
-    void Create() override
-    {
-        cout << "Вы создали война" << endl;
-        cout << "Введите имя персонажа\t";
-        cin >> name;
-        GetInfo();
-        GetWeapons();
+    Npc* GetCharacter() {
+        return currentCharacter.get();
     }
-    //деструктор - метод, который вызывается автоматически при высвобождении памяти
-    //при окончании работы с экземпляром класса (нельзя вызвать вручную)
-    ~Warrior() //деструктор всегда без аргументов
-    {
-        cout << name << " пал смертью храбрых" << endl;
-    }
+    
 };
 
-#endif
+
