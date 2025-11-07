@@ -1,282 +1,183 @@
 #include <iostream>
 #include "windows.h"
+#include "BaseClass.h"
+#include "StartClasses.h"
+
+
+//отличие sctruct от class
+//
+//struct Treasure//всё по умолчанию внутри public
+//{
+//    string name{ "добыча" };
+//    string valueQuality[5]{ "мусор, обычное, редкое, мифическое, легендарное" };
+//    string quality = valueQuality[0];
+//    unsigned int price{ 0 };
+
+enum class  ValueQuality
+{
+    trash,common , rare, mythic, legendary // эквивалент перечисления чисел
+
+    };
+
+
+    struct Treasure { // всё по умолчанию внутри private
+        string name{ "добыча" };
+        ValueQuality quality = ValueQuality::mythic;
+        //string valueQuality[5]{ "мусор,обычное ,редкое,мифическое ,легендарное" };
+       // string quality = valueQuality[0];
+
+        unsigned int price{ 0 };
+        Treasure(ValueQuality quality)
+        {
+            switch (quality)
+            {
+            case ValueQuality::trash:
+                cout << "качество плохое\n ";
+                break;
+            case ValueQuality::common:
+                cout << "качество средненькое\n ";
+                break;
+            case ValueQuality::rare:
+                cout << "качество хорошее\n ";
+                break;
+            case ValueQuality::mythic:
+                cout << "качество крутое\n ";
+                break;
+            case ValueQuality::legendary:
+                cout << "качество идеальное\n ";
+                break;
+            default:
+                break;
+            }
+        }
+    };
+    struct Cloth : Treasure // нвследование по умолчанию private
+    {
+        Cloth(ValueQuality quality): Treasure(quality){}
+        string valueSite[5]{ "обувь","перчатки","шлем","нагрудник","пояс" };
+        string site{ NULL };
+        unsigned short armor{ 1 };
+    };
+
 using namespace std;
 
+//модификаторы доступа:
+// private - приватный, запрещает доступ к свойствам и классам
+//           за пределами самого класса
+// protected - защищенный, можно передавать свойства и методы
+//        в классы наследники, но все еще нельзя использовать
+//        в основном потоке программы
+// public - публичный, общедоступный, можно использовать везде
 
-unsigned short GetChoice(unsigned short min, unsigned short max, const string& message)
+
+//базовый класс - абстрактный (класс у которого все методы виртуальные)
+
+
+
+int main()
 {
-    unsigned short choice;
-    cout << message;
-    cin >> choice;
-
-    while (choice < min || choice > max || cin.fail()) {
-        cin.clear();
-        cin.ignore(1000, '\n');
-        cout << "Неверный выбор, попробуй снова: ";
-        cin >> choice;
-    }
-
-    return choice;
-}
-
-
-class Npc {
-protected:
-    string name{ "персонаж" };
-    unsigned int health{ 10 };
-    float damage{ 5 };
-    unsigned short lvl{ 1 };
-
-public:
-    virtual void GetInfo() {
-        cout << "Имя - " << name << endl;
-        cout << "Здоровье - " << health << endl;
-        cout << "Урон - " << damage << endl;
-    }
-
-    virtual void Create() {}
-};
-
-
-class Warrior : protected virtual Npc {
-protected:
-    unsigned short strenght{ 31 };
-    string weapons[4] = { "кастет", "дубинка", "клинок", "меч" };
-
-public:
-    Warrior() {
-        name = "воин";
-        health = 35;
-        damage = 10;
-    }
-
-    Warrior(string name, unsigned int health, float damage) {
-        cout << "кастомный конструктор война" << endl;
-        this->name = name;
-        this->health = health;
-        this->damage = damage;
-    }
-
-    void GetWeapons() {
-        cout << name << " взял в руки " << weapons[lvl - 1] << endl;
-    }
-
-    void GetInfo() override {
-        Npc::GetInfo();
-        cout << "Сила - " << strenght << endl;
-        cout << "Доступное оружие - ";
-        for (int i = 0; i < lvl; i++) {
-            cout << weapons[i] << " ";
-        }
-        cout << endl;
-    }
-
-    void Create() override {
-        cout << "Вы создали воина" << endl;
-        cout << "Введите имя персонажа: ";
-        cin >> name;
-        GetInfo();
-        GetWeapons();
-    }
-
-    bool operator == (const Warrior& warrior) const {
-        return ((warrior.damage == this->damage) && (warrior.health == this->health) && (warrior.strenght == this->strenght));
-    }
-    bool Save() override {
-        if (Npc::Save()) {
-            ofstream saveSystem("save.bin", ios::binary | ios::app);
-            if (saveSystem.is_open()) {
-                saveSystem.write(reinterpret_cast<const char*>(&strenght), sizeof(strenght));
-                for (int i = 0; i < 4; i++)
-                {
-                    saveSystem
-
-                }
-            }
-
-        }
-    }
-
-    ~Warrior() {
-        cout << name << " пал смертью храбрых" << endl;
-    }
-};
-
-
-class Wizard : protected virtual Npc {
-protected:
-    unsigned short intellect = 27;
-    string spell[4] = { "вспышка", "магическая стрела", "огненный шар", "метеоритный дождь" };
-
-public:
-    Wizard() {
-        name = "волшебник";
-        health = 23;
-        damage = 15;
-    }
-
-    Wizard(string name, unsigned int health, float damage) {
-        cout << "кастомный конструктор волшебника" << endl;
-        this->name = name;
-        this->health = health;
-        this->damage = damage;
-    }
-
-    void GetInfo() override {
-        Npc::GetInfo();
-        cout << "Интеллект - " << intellect << endl;
-        cout << "Доступные заклинания - ";
-        for (int i = 0; i < lvl; i++) {
-            cout << spell[i] << " ";
-        }
-        cout << endl;
-    }
-
-    void CastSpell() {
-        cout << name << " применяет " << spell[lvl - 1] << endl;
-    }
-
-    void Create() override {
-        cout << "Вы создали волшебника" << endl;
-        cout << "Введите имя персонажа: ";
-        cin >> name;
-        GetInfo();
-        CastSpell();
-    }
-
-    Wizard operator + (const Wizard& wizard) const {
-        return Wizard(this->name, (this->health + wizard.health), (this->damage + wizard.damage));
-    }
-
-    ~Wizard() {
-        cout << name << " испустил дух" << endl;
-    }
-};
-
-
-class Paladin : public Warrior, public Wizard {
-public:
-    Paladin() {
-        name = "паладин";
-        health = 25;
-        damage = 12;
-        strenght = 27;
-    }
-
-    void GetInfo() override {
-        Warrior::GetInfo();
-        cout << "Интеллект - " << intellect << endl;
-        cout << "Доступные заклинания - ";
-        for (int i = 0; i < lvl; i++) {
-            cout << spell[i] << " ";
-        }
-        cout << endl;
-    }
-
-
-    void Create() override {
-        cout << "Вы создали паладина" << endl;
-        cout << "Введите имя персонажа: ";
-        cin >> name;
-        GetInfo();
-        CastSpell();
-        GetWeapons();
-    }
-};
-
-
-class Player {
-public:
-    void Create(Npc* player) {
-        player->Create();
-    }
-    void Save(Npc* player) {
-        player->S();
-    }
-};
-
-
-int main() {
-    setlocale(LC_ALL, "Rus");
+    setlocale(LC_ALL, ".UTF-8");
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
+
+    Cloth cloth(ValueQuality::mythic);
+    cloth.armor = 10;
+    cloth.site = cloth.valueSite[2];
+    cloth.name = "Шлем властителя подземелий";
+    cloth.price = 50;
+    cout << cloth.name << '\n' << cloth.site << '\n' << cloth.armor << '\n' << cloth.price << '\n';
 
     Warrior* warrior = new Warrior();
     Warrior* warrior2 = new Warrior();
     cout << (*warrior == *warrior2) << endl;
 
-    Wizard* wizard1 = new Wizard();
-    Wizard* wizard2 = new Wizard();
-    Wizard* megaWizard = new Wizard();
-    *megaWizard = *wizard1 + *wizard2;
-    megaWizard->GetInfo();
-
+    Wizard* wizard = new Wizard();
     Paladin* paladin = new Paladin();
     Player* player = new Player();
 
     cout << "Привет, путник\nПрисядь у костра и расскажи о себе\n";
-
-
-    unsigned short choise = GetChoice(1, 2, "Ты впервые тут? (1 - новый персонаж, 2 - загрузить)\n> ");
-
-    if (choise == 1) {
-        choise = GetChoice(1, 3, "Расскажи о своих навыках\n\t1 - Воин\n\t2 - Волшебник\n\t3 - Паладин\n> ");
-
-        switch (choise) {
-        case 1:
-            player->Create(warrior);
-            delete wizard1; delete wizard2; delete paladin;
-            break;
-        case 2:
-            player->Create(wizard1);
-            delete warrior; delete paladin;
-            break;
-        case 3:
-            player->Create(paladin);
-            delete warrior; delete wizard1;
-            break;
-        }
-    }
-
-    cout << "Сделаем остановку тут?\n\t1 - сщхранить игру\n\t2 - продолжить\n";
+    cout << "Ты впервые тут? (1 - новый персонаж, 2 - загрузить)\n";
+    unsigned short choise = 1;
     cin >> choise;
     while (choise > 2 || choise < 1)
     {
-        cout << "Наверное ты ошибся , повтори снова\n";
+        cout << "Наверное ты ошибся, повтори снова\n";
         cin >> choise;
     }
-    cout << "Сделаем остановку тут?\n\t1 - сохранить игру\n\t2 - продолжить\n";
-    cin >> choise;
-    while (choise > 2 || choise < 1) {
-        cout << "Наверное ты ошибся , повтори снова\n";
+    /*
+    unsigned short maxChoise = 3;
+    unsigned short TestChoise(unsigned short maxChoise, string text);
+    {
+        unsigned short choise = 1;
         cin >> choise;
-    }
+        while (choise > maxChoise || choise < 1)
+        {
+            cout << "Наверное ты ошибся, повтори снова\n";
+            cin >> choise;
+        }
+        return choise;
 
+       
+    };
+
+    */
     
+    if (choise == 1)
+    {
+        cout << "Расскажи о своих навыках\n\t1 - Воин\n\t2 - Волшебник\n\t3 - Паладин\n";
 
-    delete warrior;
-    warrior = nullptr;
-    delete warrior2;
-    warrior2 = nullptr;
-    delete wizard1;
-    wizard1 = nullptr;
-    delete wizard2;
-    wizard2 = nullptr;
-    delete megaWizard;
-    megaWizard = nullptr;
-    delete paladin;
-    paladin = nullptr;
-    delete player;
+        // тут уже будет вызвана ваша красивая функция
+        cin >> choise;
+        while (choise > 3 || choise < 1)
+        {
+            cout << "Такого еще не было в наших краях\nНе мог бы ты повторить\n";
+            cin >> choise;
+        }
 
-    cout << "Сделаем остановку тут\n\t1-сохранить игру\n2-продолжить\n";
-    unsigned short choice = GetChoice(1, 2);
-    if (choice == 1)
+
+        switch (choise)
+        {
+        case 1: {
+            player->Create(warrior);
+            delete wizard;
+            wizard = nullptr;
+            delete paladin;
+            paladin = nullptr;
+            break; }
+        case 2: {
+            player->Create(wizard);
+            delete warrior;
+            warrior = nullptr;
+            delete paladin;
+            paladin = nullptr;
+            cout << " " << endl;
+            break; }
+        case 3: {
+            player->Create(paladin);
+            delete warrior;
+            warrior = nullptr;
+            delete wizard;
+            wizard = nullptr;
+            break; }
+        }
+
+    }
+
+    else
+    {
+        player->Load(warrior);
+    }
+
+    cout << "сделаем остановку тут?\n\t1 - сохранить игру\n\t2 - продолжить\n";
+    cin >> choise;
+    if (choise == 1)
     {
         if (warrior != nullptr) player->Save(warrior);
-        if (warrior != nullptr) player->Save(megaWizard);
-        if (warrior != nullptr) player->Save(paladin);
-
+        if (wizard != nullptr) player->Save(wizard);
+        if (paladin != nullptr) player->Save(paladin);
     }
+
+
 
     return 0;
 }
